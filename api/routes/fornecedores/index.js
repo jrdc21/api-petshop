@@ -2,10 +2,17 @@ const router = require('express').Router();
 const TabelaFornecedor = require('./TabelaFornecedor');
 const Fornecedor = require('./Fornecedor');
 const SerializadorFornecedor = require('../../Serializador').SerializadorFornecedor;
+const routerProdutos = require('./produtos');
+
+router.options('/', (req, res) =>{
+  res.set('Access-Control-Allow-Methods', 'GET, POST');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+  res.end();
+});
 
 router.get('/', async (req, res) => {
   const results = await TabelaFornecedor.listar();
-  const serializador = new SerializadorFornecedor(res.getHeader('Content-Type'));
+  const serializador = new SerializadorFornecedor(res.getHeader('Content-Type'), ['empresa']);
   res.send(
     serializador.serializar(results)
   );
@@ -18,7 +25,7 @@ router.post('/', async (req, res, prox) => {
   
     await fornecedor.criar();
     res.status(201);
-    const serializador = new SerializadorFornecedor(res.getHeader('Content-Type'));
+    const serializador = new SerializadorFornecedor(res.getHeader('Content-Type'), ['empresa']);
     res.send(
       serializador.serializar(fornecedor)
     );
@@ -27,13 +34,19 @@ router.post('/', async (req, res, prox) => {
   }
 });
 
+router.options('/:id', (req, res) =>{
+  res.set('Access-Control-Allow-Methods', 'GET, PUT, DELETE');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+  res.end();
+});
+
 router.get('/:id', async (req, res, prox) => {
   try {
     const id = req.params.id;
     const fornecedor = new Fornecedor({id: id});
   
     await fornecedor.buscar();
-    const camposExtras = ['email', 'dataCriacao', 'dataAtualizacao', 'versao'];
+    const camposExtras = ['empresa', 'email', 'dataCriacao', 'dataAtualizacao', 'versao'];
     const serializador = new SerializadorFornecedor(res.getHeader('Content-Type'), camposExtras);
     res.send(
       serializador.serializar(fornecedor)
@@ -70,5 +83,19 @@ router.delete('/:id', async (req, res, prox) => {
     prox(e);
   }
 });
+
+const verificarFornecedor = async (req, res, prox) => {
+  try {
+    const id = req.params.idFornecedor;
+    const fornecedor = new Fornecedor({id: id});
+    await fornecedor.buscar();
+    req.fornecedor = fornecedor;
+    prox();
+  } catch(e) {
+    prox(e);
+  }
+};
+
+router.use('/:idFornecedor/produtos', verificarFornecedor, routerProdutos);
 
 module.exports = router;

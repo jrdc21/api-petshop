@@ -8,6 +8,12 @@ Na primeira versão foi realizada a construção da arquitetura da API, o banco 
  - Configuração de informações confidenciais em arquivo externalizado
  - Configuração de métodos de reposta JSON e XML
 
+Na segunda versão foi implementada novas rotas, implementação de options nas requisições e uma nova versão para a api de fornecedores. Abaixo os itens que foram criados:
+ - Tabela de Produtos e seus respectivos métodos
+ - Classe de validação de erro para estoque não ficar negativo
+ - Adição de OPTIONS nas rotas de fornecedores e produtos
+ - Criação de uma nova versão da API baseado no modelo SEMVER, somente para rota de listagem de fornecedores. Versão 1.0 ainda funciona.
+
 ### Pré-requisitos
 
 Antes de começar, você vai precisar ter instalado em sua máquina as seguintes ferramentas:
@@ -43,6 +49,20 @@ As seguintes bibliotecas foram utilizadas no projeto:
 |dataAtualizacao|Datetime|Manipulado pelo Sequelize|
 |versao|INT|-|
 
+
+### Tabela de Produtos:
+
+|Parâmetro|Tipo|Observações|
+|:-------:|:--:|:---------:|
+|id|INT|Manipulado pelo Sequelize|
+|titulo|Varchar(255)|Obrigatório|
+|preco|Double|Obrigatório|
+|estoque|INT(11)|Valor padrão "0"|
+|fornecedor|INT(11)|Valor utilizado através da rota|
+|dataCriacao|Datetime|Manipulado pelo Sequelize|
+|dataAtualizacao|Datetime|Manipulado pelo Sequelize|
+|versao|INT|-|
+
 ### Montagem dos requests de Fornecedores:
 
 *O retorno padrão da api é no formato JSON, caso queira receber em formato XML, basta adicionar no cabeçalho da requisição o header 'Accept' com valor 'application/xml'
@@ -56,7 +76,22 @@ As seguintes bibliotecas foram utilizadas no projeto:
 |Criar fornecedor|POST|http://localhost:3000/api/fornecedores/|{ "empresa": "nomeDaEmpresa", "email": "emailEmpresa", "categoria": "categoria"}|
 |Atualizar fornecedor|PUT|http://localhost:3000/api/fornecedores/|{"empresa": "nomeDaEmpresa"}|
 |Deletar fornecedor|DELETE|http://localhost:3000/api/fornecedores/1|não possui|
+|Lista de fornecedores V2|GET|http://localhost:3000/api/v2/fornecedores/|não possui|
 
+### Montagem dos requests de Produtos:
+
+*O retorno padrão da api é no formato JSON, caso queira receber em formato XML, basta adicionar no cabeçalho da requisição o header 'Accept' com valor 'application/xml'
+
+*Todo corpo de requisição deve ser no formato JSON
+
+|Request | Método | URL | Corpo da requisição |
+|--------|:------:|:---:|---------------------|
+|Lista de produtos|GET|http://localhost:3000/api/fornecedores/1/produtos/|não possui|
+|Listar único produto|GET|http://localhost:3000/api/fornecedores/1/produtos/1|não possui|
+|Criar produto|POST|http://localhost:3000/api/fornecedores/1/produtos/|{ "titulo": "tituloDoProduto", "preco": 1, "estoque": 1}|
+|Atualizar produto|PUT|http://localhost:3000/api/fornecedores/1/produtos/1|{"titulo": "tituloDoProduto"}|
+|Deletar produto|DELETE|http://localhost:3000/api/fornecedores/1/produtos/1|não possui|
+|Reduzir estoque|POST|http://localhost:3000/api/fornecedores/1/produtos/1/reduzir-estoque/|{"quantidade": 1}
 
 
 ### Rodando a API
